@@ -4,7 +4,6 @@ import numpy as np
 import tensorflow as tf
 import joblib
 from tensorflow.keras.models import load_model
-from tensorflow.keras import Layer
 
 # -------------------- Custom Attention Layer --------------------
 class Attention(tf.keras.layers.Layer):
@@ -25,7 +24,7 @@ class Attention(tf.keras.layers.Layer):
         return tf.keras.backend.sum(output, axis=1)
 
 # -------------------- Load Models --------------------
-model_ann = load_model('ann.h5')
+model_ann = load_model('ann.h5', custom_objects={'Attention': Attention})
 model_hybrid = load_model("hybrid.h5", custom_objects={'Attention': Attention})
 
 # -------------------- Load Scalers --------------------
@@ -51,7 +50,14 @@ input_method = st.radio("Choose input method:", ["Manual Entry", "Upload CSV"])
 input_df = None
 if input_method == "Manual Entry":
     st.markdown("### Enter feature values:")
-    user_input = {feature: st.number_input(f"{feature}", value=0.0) for feature in features}
+    user_input = {}
+    for feature in features:
+        value = st.text_input(f"{feature}", value="0.0")
+        try:
+            user_input[feature] = float(value)
+        except ValueError:
+            st.warning(f"⚠️ Please enter a valid number for {feature}")
+            st.stop()
     input_df = pd.DataFrame([user_input])
 
 elif input_method == "Upload CSV":
