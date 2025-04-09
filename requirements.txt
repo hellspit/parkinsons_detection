@@ -1,0 +1,6 @@
+tensorflow
+streamlit
+numpy
+pandas
+matplotlib
+scikit-learn
